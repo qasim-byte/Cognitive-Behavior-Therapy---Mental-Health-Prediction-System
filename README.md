@@ -1,12 +1,12 @@
-# MindCheck v3 — Cognitive Behavioral Report
+# MindCheck Final Version — Cognitive Behavioral Report
 ## Qasim's MindCheck Model
 
-### What's new vs v2
+### What has Improved from Beta?
 
-| Feature | v2 | v3 |
+| Feature | Beta | Final |
 |---|---|---|
 | Datasets | OSMI survey (1,259 rows) | OSMI + Mental Health Dataset (293K+ rows) |
-| Model accuracy | ~88% | ~98% |
+| Model accuracy | 88% | 98% |
 | Interaction features | ❌ | ✅ stress×coping, mood×social, etc. |
 | Report title | Generic | "Cognitive Behavioral Report" |
 | Patient name | ❌ | ✅ Appears on report header |
