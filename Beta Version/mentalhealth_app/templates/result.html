@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your MindCheck Report</title>
+<style>
+  :root {
+    --bg: #f7f6f2;
+    --card: #ffffff;
+    --border: #e5e3db;
+    --text: #1a1a18;
+    --muted: #6b6a63;
+    --radius: 14px;
+    --green:  #1D9E75;
+    --yellow: #EF9F27;
+    --orange: #D85A30;
+    --red:    #A32D2D;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+         color: var(--text); min-height: 100vh; padding: 40px 20px 80px; }
+  .wrapper { max-width: 720px; margin: 0 auto; }
+
+  /* ── Overall result hero ── */
+  .result-hero {
+    border-radius: 20px; padding: 36px 32px; margin-bottom: 28px;
+    text-align: center; border: 1.5px solid;
+    animation: fadeIn 0.5s ease;
+  }
+  .result-hero .label { font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
+                        text-transform: uppercase; margin-bottom: 10px; opacity: 0.7; }
+  .result-hero .level { font-size: 44px; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; }
+  .result-hero .score-line { font-size: 18px; font-weight: 500; opacity: 0.8; margin-bottom: 12px; }
+  .result-hero .confidence { font-size: 13px; opacity: 0.65; }
+
+  /* ── HbA1c gauge bar ── */
+  .gauge-section { background: var(--card); border: 1px solid var(--border);
+                   border-radius: var(--radius); padding: 24px; margin-bottom: 24px; }
+  .gauge-title { font-size: 14px; font-weight: 600; margin-bottom: 18px; }
+  .gauge-track { position: relative; height: 12px; border-radius: 6px; margin-bottom: 8px;
+                 background: linear-gradient(to right, #1D9E75, #9FE1CB, #EF9F27, #D85A30, #A32D2D); }
+  .gauge-needle { position: absolute; top: -6px; transform: translateX(-50%);
+                  width: 4px; height: 24px; border-radius: 2px; background: var(--text);
+                  transition: left 1s cubic-bezier(.4,0,.2,1); }
+  .gauge-labels { display: flex; justify-content: space-between;
+                  font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .gauge-zones  { display: flex; justify-content: space-between; margin-top: 14px; gap: 6px; }
+  .gauge-zone   { flex: 1; text-align: center; padding: 8px 4px; border-radius: 8px;
+                  font-size: 11px; font-weight: 600; }
+
+  /* ── Domain breakdown ── */
+  .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+  .domain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+  .domain-card {
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+    animation: slideUp 0.4s ease both;
+  }
+  .domain-card:nth-child(2) { animation-delay: 0.07s; }
+  .domain-card:nth-child(3) { animation-delay: 0.14s; }
+  .domain-card:nth-child(4) { animation-delay: 0.21s; }
+  .domain-name { font-size: 12px; font-weight: 600; color: var(--muted);
+                 text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .domain-score-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+  .domain-score { font-size: 36px; font-weight: 800; letter-spacing: -1px; }
+  .domain-max   { font-size: 14px; color: var(--muted); }
+  .domain-risk-badge {
+    display: inline-block; font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 20px; margin-bottom: 10px;
+  }
+  .domain-bar-track { background: var(--bg); border-radius: 4px; height: 6px; margin-bottom: 12px; }
+  .domain-bar-fill  { height: 6px; border-radius: 4px; transition: width 1s ease; }
+  .domain-rec { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+  /* ── Probability breakdown ── */
+  .prob-section { background: var(--card); border: 1px solid var(--border);
+                  border-radius: var(--radius); padding: 24px; margin-bottom: 24px; }
+  .prob-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .prob-row:last-child { margin-bottom: 0; }
+  .prob-label { width: 80px; font-size: 13px; font-weight: 500; }
+  .prob-track { flex: 1; background: var(--bg); border-radius: 4px; height: 10px; }
+  .prob-fill  { height: 10px; border-radius: 4px; transition: width 1s ease; }
+  .prob-pct   { width: 42px; font-size: 13px; font-weight: 600; text-align: right; }
+
+  /* ── Recommendations ── */
+  .rec-section { background: var(--card); border: 1px solid var(--border);
+                 border-radius: var(--radius); padding: 24px; margin-bottom: 28px; }
+  .rec-header { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+  .rec-item { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
+  .rec-item:last-child { margin-bottom: 0; }
+  .rec-dot  { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .rec-text { font-size: 14px; line-height: 1.6; color: var(--muted); }
+
+  /* ── Footer ── */
+  .footer-actions { display: flex; gap: 12px; }
+  .btn-primary { flex: 1; padding: 14px; background: var(--text); color: white; border: none;
+                 border-radius: var(--radius); font-size: 14px; font-weight: 600;
+                 cursor: pointer; text-align: center; text-decoration: none; display: block; }
+  .btn-secondary { flex: 1; padding: 14px; background: var(--card); color: var(--text);
+                   border: 1.5px solid var(--border); border-radius: var(--radius);
+                   font-size: 14px; font-weight: 600; cursor: pointer;
+                   text-align: center; text-decoration: none; display: block; }
+  .disclaimer { text-align: center; font-size: 12px; color: var(--muted); margin-top: 16px; line-height: 1.6; }
+
+  /* ── Model accuracy badge ── */
+  .model-badge { display: flex; align-items: center; justify-content: center; gap: 8px;
+                 font-size: 12px; color: var(--muted); margin-bottom: 24px; }
+  .model-badge span { background: #E1F5EE; color: #085041; font-weight: 600;
+                      padding: 2px 8px; border-radius: 4px; }
+
+  @keyframes fadeIn  { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 520px) {
+    .domain-grid { grid-template-columns: 1fr; }
+    .result-hero .level { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  {% set c = result.overall_color %}
+  {% set r = result.overall_risk %}
+
+  <!-- ── Overall result ── -->
+  <div class="result-hero" style="background: {{ c }}18; border-color: {{ c }}55; color: {{ c }};">
+    <div class="label">Your MindCheck Result</div>
+    <div class="level">{{ result.overall_label }}</div>
+    <div class="score-line" style="color: var(--text)">
+      Overall score: <strong>{{ result.overall_score }}</strong> / 10
+      &nbsp;·&nbsp; Confidence: <strong>{{ result.confidence }}%</strong>
+    </div>
+    <div class="confidence" style="color: var(--muted)">
+      Based on {{ result.model_accuracy }}% accurate Random Forest model
+    </div>
+  </div>
+
+  <!-- ── Gauge bar ── -->
+  <div class="gauge-section">
+    <div class="gauge-title">Mental Health Risk Gauge</div>
+    <div class="gauge-track">
+      <div class="gauge-needle" id="needle"></div>
+    </div>
+    <div class="gauge-labels">
+      <span>0 — Healthy</span>
+      <span>5 — Moderate</span>
+      <span>10 — Severe</span>
+    </div>
+    <div class="gauge-zones">
+      <div class="gauge-zone" style="background:#E1F5EE; color:#085041; {{ 'outline:2px solid #1D9E75;' if r==0 else '' }}">Normal</div>
+      <div class="gauge-zone" style="background:#FAEEDA; color:#633806; {{ 'outline:2px solid #EF9F27;' if r==1 else '' }}">Mild</div>
+      <div class="gauge-zone" style="background:#FAECE7; color:#712B13; {{ 'outline:2px solid #D85A30;' if r==2 else '' }}">Moderate</div>
+      <div class="gauge-zone" style="background:#FCEBEB; color:#791F1F; {{ 'outline:2px solid #A32D2D;' if r==3 else '' }}">Severe</div>
+    </div>
+  </div>
+
+  <!-- ── Domain breakdown ── -->
+  <div class="section-title">Your 4-Domain Breakdown</div>
+  <div class="domain-grid">
+    {% for key, d in result.domains.items() %}
+    <div class="domain-card">
+      <div class="domain-name">{{ d.label }}</div>
+      <div class="domain-score-row">
+        <div class="domain-score" style="color: {{ d.color }}">{{ d.score }}</div>
+        <div class="domain-max">/ 10</div>
+      </div>
+      <div class="domain-risk-badge" style="background: {{ d.color }}20; color: {{ d.color }};">
+        {{ d.risk_label }}
+      </div>
+      <div class="domain-bar-track">
+        <div class="domain-bar-fill domain-bar-{{ key }}"
+             style="width: 0%; background: {{ d.color }};"></div>
+      </div>
+      <div class="domain-rec">{{ d.recommendation }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- ── Probability breakdown ── -->
+  <div class="prob-section">
+    <div class="gauge-title" style="margin-bottom:16px">Model confidence per level</div>
+    {% set colors = {'Normal':'#1D9E75','Mild':'#EF9F27','Moderate':'#D85A30','Severe':'#A32D2D'} %}
+    {% for label, pct in result.proba.items() %}
+    <div class="prob-row">
+      <div class="prob-label">{{ label }}</div>
+      <div class="prob-track">
+        <div class="prob-fill prob-bar-{{ loop.index }}"
+             style="width: 0%; background: {{ colors[label] }};"></div>
+      </div>
+      <div class="prob-pct" style="color: {{ colors[label] }}">{{ pct }}%</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- ── Recommendations ── -->
+  <div class="rec-section">
+    <div class="rec-header">Personalised Recommendations</div>
+    {% for rec in result.recommendations %}
+    <div class="rec-item">
+      <div class="rec-dot" style="background: {{ result.overall_color }};"></div>
+      <div class="rec-text">{{ rec }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- ── Footer actions ── -->
+  <div class="footer-actions">
+    <a href="/" class="btn-secondary">← Retake Assessment</a>
+    <button onclick="window.print()" class="btn-primary">Save / Print Report</button>
+  </div>
+  <p class="disclaimer">
+    This is a demonstration model for educational purposes only.<br>
+    It is not a substitute for professional medical or psychological advice.
+  </p>
+
+</div>
+
+<script>
+  const score = {{ result.overall_score }};
+  const domains = {
+    {% for key, d in result.domains.items() %}
+    '{{ key }}': {{ d.score }},
+    {% endfor %}
+  };
+  const probas = {
+    {% for label, pct in result.proba.items() %}
+    '{{ loop.index }}': {{ pct }},
+    {% endfor %}
+  };
+
+  window.addEventListener('load', () => {
+    // Needle
+    setTimeout(() => {
+      document.getElementById('needle').style.left = (score * 10) + '%';
+    }, 200);
+
+    // Domain bars
+    {% for key, d in result.domains.items() %}
+    setTimeout(() => {
+      const el = document.querySelector('.domain-bar-{{ key }}');
+      if (el) el.style.width = ({{ d.score }} * 10) + '%';
+    }, 300);
+    {% endfor %}
+
+    // Prob bars
+    {% for label, pct in result.proba.items() %}
+    setTimeout(() => {
+      const el = document.querySelector('.prob-bar-{{ loop.index }}');
+      if (el) el.style.width = '{{ pct }}%';
+    }, 400);
+    {% endfor %}
+  });
+</script>
+</body>
+</html>

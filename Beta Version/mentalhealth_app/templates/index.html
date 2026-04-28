@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MindCheck — Mental Health Assessment</title>
+<style>
+  :root {
+    --bg: #f7f6f2;
+    --card: #ffffff;
+    --border: #e5e3db;
+    --text: #1a1a18;
+    --muted: #6b6a63;
+    --accent: #1D9E75;
+    --accent-light: #E1F5EE;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+         color: var(--text); min-height: 100vh; padding: 40px 20px 80px; }
+  .wrapper { max-width: 720px; margin: 0 auto; }
+
+  .hero { text-align: center; margin-bottom: 40px; }
+  .hero-badge { display: inline-block; background: var(--accent-light); color: #085041;
+                font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px;
+                margin-bottom: 16px; letter-spacing: 0.04em; }
+  .hero h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 10px; }
+  .hero p  { color: var(--muted); font-size: 15px; line-height: 1.6; max-width: 500px; margin: 0 auto; }
+
+  .accuracy-bar { display: flex; align-items: center; justify-content: center; gap: 8px;
+                  margin-top: 16px; font-size: 13px; color: var(--muted); }
+  .accuracy-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+
+  .section { margin-bottom: 28px; }
+  .section-header { display: flex; align-items: center; gap-10px; margin-bottom: 16px; }
+  .section-num { width: 28px; height: 28px; background: var(--accent); color: white;
+                 border-radius: 50%; display: flex; align-items: center; justify-content: center;
+                 font-size: 12px; font-weight: 700; flex-shrink: 0; margin-right: 10px; }
+  .section-title { font-size: 16px; font-weight: 600; }
+  .section-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+          padding: 24px; margin-bottom: 16px; }
+
+  .question { margin-bottom: 22px; }
+  .question:last-child { margin-bottom: 0; }
+  .q-label { font-size: 14px; font-weight: 500; margin-bottom: 12px; display: block; }
+  .q-sub   { font-size: 12px; color: var(--muted); margin-top: -8px; margin-bottom: 12px; display: block; }
+
+  .scale { display: flex; gap: 8px; }
+  .scale input[type=radio] { display: none; }
+  .scale label {
+    flex: 1; text-align: center; padding: 10px 4px; border: 1.5px solid var(--border);
+    border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500;
+    transition: all 0.15s; color: var(--muted); user-select: none;
+  }
+  .scale input[type=radio]:checked + label {
+    background: var(--accent); border-color: var(--accent); color: white;
+  }
+  .scale label:hover { border-color: var(--accent); color: var(--accent); }
+  .scale-legend { display: flex; justify-content: space-between; margin-top: 6px;
+                  font-size: 11px; color: var(--muted); }
+
+  .select-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .select-group input[type=radio] { display: none; }
+  .select-group label {
+    padding: 8px 16px; border: 1.5px solid var(--border); border-radius: 8px;
+    cursor: pointer; font-size: 13px; font-weight: 500; color: var(--muted);
+    transition: all 0.15s; user-select: none;
+  }
+  .select-group input[type=radio]:checked + label {
+    background: var(--accent-light); border-color: var(--accent); color: #085041;
+  }
+  .select-group label:hover { border-color: var(--accent); }
+
+  .progress-bar { background: var(--border); border-radius: 4px; height: 4px; margin-bottom: 32px; }
+  .progress-fill { background: var(--accent); height: 4px; border-radius: 4px;
+                   width: 0%; transition: width 0.4s ease; }
+
+  .submit-btn {
+    width: 100%; padding: 16px; background: var(--accent); color: white; border: none;
+    border-radius: var(--radius); font-size: 16px; font-weight: 600; cursor: pointer;
+    transition: background 0.2s; letter-spacing: 0.02em;
+  }
+  .submit-btn:hover { background: #0F6E56; }
+  .submit-btn:active { transform: scale(0.99); }
+
+  .disclaimer { text-align: center; font-size: 12px; color: var(--muted); margin-top: 16px;
+                line-height: 1.6; }
+
+  @media (max-width: 500px) {
+    .scale label { padding: 8px 2px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="hero">
+    <div class="hero-badge">Mental Health Assessment</div>
+    <h1>MindCheck</h1>
+    <p>Answer 11 short questions honestly. We'll analyse your responses across 4 domains and give you a detailed mental health report — like an HbA1c for your mind.</p>
+    <div class="accuracy-bar">
+      <span class="accuracy-dot"></span>
+      <span>Model accuracy: <strong>96.25%</strong> &nbsp;·&nbsp; For demonstration purposes only</span>
+    </div>
+  </div>
+
+  <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+  <form action="/predict" method="POST" id="assessment-form">
+
+    <!-- SECTION 1: Emotional Health -->
+    <div class="section">
+      <div class="section-header" style="display:flex;align-items:flex-start;">
+        <div class="section-num">1</div>
+        <div>
+          <div class="section-title">Emotional Health</div>
+          <div class="section-sub">How you've been feeling emotionally in the past 2–4 weeks</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="question">
+          <span class="q-label">How often have you felt sad, empty, or hopeless?</span>
+          <span class="q-sub">This reflects your current depression level</span>
+          <div class="scale">
+            {% for i, lbl in [(1,'Rarely'),(2,'Sometimes'),(3,'Often'),(4,'Very often'),(5,'Almost always')] %}
+            <input type="radio" name="depression" id="dep{{i}}" value="{{i}}" required>
+            <label for="dep{{i}}">{{i}}<br><span style="font-size:10px;font-weight:400">{{lbl}}</span></label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="question">
+          <span class="q-label">How much have you been troubled by nervousness, worry, or fear?</span>
+          <span class="q-sub">This reflects your anxiety level</span>
+          <div class="scale">
+            {% for i, lbl in [(1,'Not at all'),(2,'A little'),(3,'Moderately'),(4,'Quite a bit'),(5,'Extremely')] %}
+            <input type="radio" name="anxiety" id="anx{{i}}" value="{{i}}" required>
+            <label for="anx{{i}}">{{i}}<br><span style="font-size:10px;font-weight:400">{{lbl}}</span></label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: Social Wellbeing -->
+    <div class="section">
+      <div class="section-header" style="display:flex;align-items:flex-start;">
+        <div class="section-num">2</div>
+        <div>
+          <div class="section-title">Social Wellbeing</div>
+          <div class="section-sub">Your relationships and sense of connection with others</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="question">
+          <span class="q-label">How isolated or cut off from others have you felt?</span>
+          <span class="q-sub">Feeling of loneliness or social withdrawal</span>
+          <div class="scale">
+            {% for i, lbl in [(1,'Not at all'),(2,'A little'),(3,'Somewhat'),(4,'Quite a bit'),(5,'Very much')] %}
+            <input type="radio" name="isolation" id="iso{{i}}" value="{{i}}" required>
+            <label for="iso{{i}}">{{i}}<br><span style="font-size:10px;font-weight:400">{{lbl}}</span></label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="question">
+          <span class="q-label">How would you rate the quality of your social relationships?</span>
+          <span class="q-sub">Family, friends, classmates — overall connection</span>
+          <div class="scale">
+            {% for i, lbl in [(1,'Very poor'),(2,'Poor'),(3,'Average'),(4,'Good'),(5,'Excellent')] %}
+            <input type="radio" name="social_relationships" id="soc{{i}}" value="{{i}}" required>
+            <label for="soc{{i}}">{{i}}<br><span style="font-size:10px;font-weight:400">{{lbl}}</span></label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="question">
+          <span class="q-label">Have you experienced any discrimination or unfair treatment at your institution?</span>
+          <div class="select-group">
+            <input type="radio" name="campus_discrimination" id="disc0" value="0" required>
+            <label for="disc0">No</label>
+            <input type="radio" name="campus_discrimination" id="disc1" value="1">
+            <label for="disc1">Yes</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Stress & Academics -->
+    <div class="section">
+      <div class="section-header" style="display:flex;align-items:flex-start;">
+        <div class="section-num">3</div>
+        <div>
+          <div class="section-title">Stress &amp; Academics</div>
+          <div class="section-sub">Academic workload, financial pressure, and how you're coping</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="question">
+          <span class="q-label">How much pressure do you feel from your academic workload?</span>
+          <div class="scale">
+            {% for i, lbl in [(1,'Very low'),(2,'Low'),(3,'Moderate'),(4,'High'),(5,'Very high')] %}
+            <input type="radio" name="academic_pressure" id="pres{{i}}" value="{{i}}" required>
+            <label for="pres{{i}}">{{i}}<br><span style="font-size:10px;font-weight:400">{{lbl}}</span></label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="question">
+          <span class="q-label">How worried are you about financial concerns (fees, expenses, future income)?</span>
+          <div class="scale">
+            {% for i, lbl in [(1,'Not worried'),(2,'A little'),(3,'Somewhat'),(4,'Very worried'),(5,'Extremely')] %}
+            <input type="radio" name="financial_concerns" id="fin{{i}}" value="{{i}}" required>
+            <label for="fin{{i}}">{{i}}<br><span style="font-size:10px;font-weight:400">{{lbl}}</span></label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="question">
+          <span class="q-label">How satisfied are you with your academic progress and performance?</span>
+          <div class="scale">
+            {% for i, lbl in [(1,'Very low'),(2,'Low'),(3,'Moderate'),(4,'High'),(5,'Very high')] %}
+            <input type="radio" name="study_satisfaction" id="sat{{i}}" value="{{i}}" required>
+            <label for="sat{{i}}">{{i}}<br><span style="font-size:10px;font-weight:400">{{lbl}}</span></label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: Future & Lifestyle -->
+    <div class="section">
+      <div class="section-header" style="display:flex;align-items:flex-start;">
+        <div class="section-num">4</div>
+        <div>
+          <div class="section-title">Future Outlook &amp; Lifestyle</div>
+          <div class="section-sub">Your sense of the future, sleep, and physical activity</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="question">
+          <span class="q-label">How uncertain or insecure do you feel about your future?</span>
+          <div class="scale">
+            {% for i, lbl in [(1,'Very secure'),(2,'Secure'),(3,'Neutral'),(4,'Insecure'),(5,'Very insecure')] %}
+            <input type="radio" name="future_insecurity" id="fut{{i}}" value="{{i}}" required>
+            <label for="fut{{i}}">{{i}}<br><span style="font-size:10px;font-weight:400">{{lbl}}</span></label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="question">
+          <span class="q-label">How many hours of sleep do you get on average per night?</span>
+          <div class="select-group">
+            <input type="radio" name="average_sleep" id="slp1" value="1" required>
+            <label for="slp1">2–4 hrs</label>
+            <input type="radio" name="average_sleep" id="slp2" value="2">
+            <label for="slp2">4–6 hrs</label>
+            <input type="radio" name="average_sleep" id="slp3" value="3">
+            <label for="slp3">7–8 hrs</label>
+          </div>
+        </div>
+        <div class="question">
+          <span class="q-label">How often do you engage in physical activity or sports per week?</span>
+          <div class="select-group">
+            <input type="radio" name="sports_engagement" id="spt1" value="1" required>
+            <label for="spt1">None</label>
+            <input type="radio" name="sports_engagement" id="spt2" value="2">
+            <label for="spt2">1–3 times</label>
+            <input type="radio" name="sports_engagement" id="spt3" value="3">
+            <label for="spt3">4–6 times</label>
+            <input type="radio" name="sports_engagement" id="spt4" value="4">
+            <label for="spt4">Daily</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submit-btn">Analyse My Mental Health →</button>
+    <p class="disclaimer">This tool is for educational and demonstration purposes only.<br>It is not a clinical diagnostic tool and should not replace professional medical advice.</p>
+
+  </form>
+</div>
+
+<script>
+  const form = document.getElementById('assessment-form');
+  const progress = document.getElementById('progress');
+  const totalRequired = 11;
+
+  function updateProgress() {
+    const answered = new Set();
+    form.querySelectorAll('input[type=radio]:checked').forEach(r => answered.add(r.name));
+    progress.style.width = (answered.size / totalRequired * 100) + '%';
+  }
+
+  form.addEventListener('change', updateProgress);
+
+  form.addEventListener('submit', function(e) {
+    const btn = document.getElementById('submit-btn');
+    btn.textContent = 'Analysing...';
+    btn.disabled = true;
+  });
+</script>
+</body>
+</html>
