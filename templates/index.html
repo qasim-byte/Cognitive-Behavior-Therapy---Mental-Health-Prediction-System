@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MindCheck — Cognitive Behavioral Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #F4F1EC;
+    --paper:    #FDFCFA;
+    --ink:      #1C1C1A;
+    --muted:    #7A7670;
+    --faint:    #E8E4DC;
+    --rule:     #D4CFC5;
+    --teal:     #1A7A5A;
+    --teal-lt:  #E4F3ED;
+    --blue:     #1E3A5F;
+    --blue-lt:  #EBF0F8;
+    --serif:    'Cormorant Garamond', Georgia, serif;
+    --sans:     'DM Sans', system-ui, sans-serif;
+    --r:        10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: var(--sans);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 0 0 100px;
+  }
+
+  /* ── Letterhead ── */
+  .letterhead {
+    background: var(--blue);
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .letterhead::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent, transparent 40px,
+      rgba(255,255,255,0.018) 40px,
+      rgba(255,255,255,0.018) 41px
+    );
+  }
+  .lh-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 36px 32px 32px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    position: relative;
+  }
+  .lh-left {}
+  .clinic-name {
+    font-family: var(--serif);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+  .lh-title {
+    font-family: var(--serif);
+    font-size: 34px;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+  }
+  .lh-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+  .lh-right {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .accuracy-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 30px;
+    padding: 7px 14px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.8);
+    font-weight: 500;
+  }
+  .acc-dot { width: 7px; height: 7px; background: #5EEAB5; border-radius: 50%; }
+  .ds-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 30px;
+    padding: 5px 12px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 8px;
+  }
+
+  /* ── Progress strip ── */
+  .progress-strip { background: var(--rule); height: 3px; }
+  .progress-fill { background: var(--teal); height: 3px; width: 0%; transition: width 0.3s ease; }
+
+  /* ── Main wrapper ── */
+  .wrapper { max-width: 760px; margin: 0 auto; padding: 40px 24px 0; }
+
+  /* ── Section ── */
+  .section { margin-bottom: 32px; }
+  .section-rule {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .section-index {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--teal);
+    line-height: 1;
+    flex-shrink: 0;
+    width: 28px;
+  }
+  .section-index.demo { color: var(--blue); }
+  .section-label { font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: 0.02em; }
+  .section-desc  { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .section-line  { flex: 1; height: 1px; background: var(--rule); }
+
+  /* ── Card ── */
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    padding: 28px 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card.demo-card { border-color: #C5D5EE; background: #FAFCFF; }
+
+  /* ── Question ── */
+  .question { margin-bottom: 26px; }
+  .question:last-child { margin-bottom: 0; }
+  .q-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 5px;
+    display: block;
+    line-height: 1.5;
+  }
+  .q-hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 13px;
+    display: block;
+    font-style: italic;
+  }
+
+  /* ── Name input ── */
+  .name-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid var(--rule);
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--ink);
+    background: white;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .name-input:focus { border-color: var(--blue); }
+  .name-input::placeholder { color: #AAA; }
+
+  /* ── Scale buttons ── */
+  .scale { display: flex; gap: 7px; }
+  .scale input[type=radio] { display: none; }
+  .scale label {
+    flex: 1; text-align: center;
+    padding: 11px 4px 9px;
+    border: 1.5px solid var(--rule);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.13s;
+    color: var(--muted);
+    user-select: none;
+    line-height: 1.3;
+  }
+  .scale input[type=radio]:checked + label {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: white;
+  }
+  .scale label:hover { border-color: var(--teal); color: var(--teal); }
+  .scale .lbl-num { display: block; font-size: 16px; font-family: var(--serif); font-weight: 600; }
+  .scale .lbl-txt { display: block; font-size: 10px; margin-top: 2px; }
+
+  /* ── Demo scale (blue) ── */
+  .demo-scale { display: flex; gap: 7px; flex-wrap: wrap; }
+  .demo-scale input[type=radio] { display: none; }
+  .demo-scale label {
+    padding: 8px 18px;
+    border: 1.5px solid #C5D5EE;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    transition: all 0.13s;
+    user-select: none;
+  }
+  .demo-scale input[type=radio]:checked + label {
+    background: var(--blue-lt);
+    border-color: var(--blue);
+    color: var(--blue);
+    font-weight: 600;
+  }
+  .demo-scale label:hover { border-color: var(--blue); color: var(--blue); }
+
+  /* ── Country select ── */
+  .select-wrap select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid #C5D5EE;
+    border-radius: 8px;
+    background: white;
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A7670' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  .select-wrap select:focus { border-color: var(--blue); }
+
+  /* ── Pills ── */
+  .pills { display: flex; gap: 7px; flex-wrap: wrap; }
+  .pills input[type=radio] { display: none; }
+  .pills label {
+    padding: 8px 16px;
+    border: 1.5px solid var(--rule);
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    transition: all 0.13s;
+    user-select: none;
+  }
+  .pills input[type=radio]:checked + label {
+    background: var(--teal-lt);
+    border-color: var(--teal);
+    color: #0E5C40;
+    font-weight: 600;
+  }
+  .pills label:hover { border-color: var(--teal); color: var(--teal); }
+
+  /* ── Submit ── */
+  .submit-wrap { margin-top: 8px; }
+  .submit-btn {
+    width: 100%;
+    padding: 17px;
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: var(--r);
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .submit-btn:hover  { background: #162D4A; }
+  .submit-btn:active { transform: scale(0.99); }
+  .submit-btn svg { transition: transform 0.2s; }
+  .submit-btn:hover svg { transform: translateX(4px); }
+
+  .disclaimer {
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 14px;
+    line-height: 1.7;
+  }
+
+  /* ── Two-col questions ── */
+  .q-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; }
+  @media (max-width: 540px) {
+    .q-grid { grid-template-columns: 1fr; }
+    .scale label { padding: 9px 2px; font-size: 11px; }
+    .lh-inner { flex-direction: column; }
+    .lh-right { text-align: left; }
+  }
+
+  /* ── Divider inside card ── */
+  .card-divider { border: none; border-top: 1px solid var(--faint); margin: 22px 0; }
+</style>
+</head>
+<body>
+
+<div class="letterhead">
+  <div class="lh-inner">
+    <div class="lh-left">
+      <div class="clinic-name">{{ clinic_name }}</div>
+      <div class="lh-title">{{ report_title }}</div>
+      <div class="lh-sub">A structured self-report assessment across four behavioral domains</div>
+    </div>
+    <div class="lh-right">
+      <div class="accuracy-pill">
+        <span class="acc-dot"></span>
+        Model accuracy: <strong>{{ model_accuracy }}%</strong>
+      </div>
+      <div style="display:block; margin-top:8px;">
+        <div class="ds-badge">📊 293K+ survey responses in training</div>
+      </div>
+      <div style="display:block; margin-top:6px;">
+        <div class="ds-badge">⚠ Educational use only</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="progress-strip">
+  <div class="progress-fill" id="progress"></div>
+</div>
+
+<div class="wrapper">
+<form action="/predict" method="POST" id="assessment-form">
+
+  <!-- ══ PATIENT SECTION ══ -->
+  <div class="section">
+    <div class="section-rule">
+      <div class="section-index demo">I</div>
+      <div>
+        <div class="section-label">Patient Profile</div>
+        <div class="section-desc">Your details personalise the report and calibrate demographic baselines</div>
+      </div>
+      <div class="section-line"></div>
+    </div>
+    <div class="card demo-card">
+
+      <div class="question">
+        <span class="q-label">Full name (appears on your report)</span>
+        <input type="text" name="patient_name" class="name-input" placeholder="e.g. Aisha Raza" autocomplete="off">
+      </div>
+
+      <hr class="card-divider">
+
+      <div class="q-grid">
+        <div class="question">
+          <span class="q-label">Gender</span>
+          <div class="demo-scale">
+            <input type="radio" name="gender" id="gm" value="Male" required>
+            <label for="gm">Male</label>
+            <input type="radio" name="gender" id="gf" value="Female">
+            <label for="gf">Female</label>
+            <input type="radio" name="gender" id="go" value="Other">
+            <label for="go">Other</label>
+          </div>
+        </div>
+        <div class="question">
+          <span class="q-label">Age group</span>
+          <div class="demo-scale">
+            <input type="radio" name="age_group" id="a1" value="Under 25" required>
+            <label for="a1">Under 25</label>
+            <input type="radio" name="age_group" id="a2" value="25–34">
+            <label for="a2">25–34</label>
+            <input type="radio" name="age_group" id="a3" value="35–44">
+            <label for="a3">35–44</label>
+            <input type="radio" name="age_group" id="a4" value="45+">
+            <label for="a4">45+</label>
+          </div>
+        </div>
+      </div>
+
+      <hr class="card-divider">
+
+      <div class="q-grid">
+        <div class="question">
+          <span class="q-label">Country</span>
+          <div class="select-wrap">
+            <select name="country" required>
+              <option value="" disabled selected>Select country</option>
+              <option>United States</option><option>United Kingdom</option>
+              <option>Canada</option><option>Germany</option>
+              <option>Netherlands</option><option>Ireland</option>
+              <option>Australia</option><option>France</option>
+              <option>India</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="question">
+          <span class="q-label">Current occupation</span>
+          <div class="demo-scale" style="flex-wrap:wrap;">
+            <input type="radio" name="occupation" id="oc0" value="0" required>
+            <label for="oc0">Corporate</label>
+            <input type="radio" name="occupation" id="oc1" value="1">
+            <label for="oc1">Business</label>
+            <input type="radio" name="occupation" id="oc2" value="2">
+            <label for="oc2">Student</label>
+            <input type="radio" name="occupation" id="oc3" value="3">
+            <label for="oc3">Housewife</label>
+            <input type="radio" name="occupation" id="oc4" value="4">
+            <label for="oc4">Other</label>
+          </div>
+        </div>
+      </div>
+
+      <hr class="card-divider">
+
+      <div class="q-grid">
+        <div class="question">
+          <span class="q-label">Family history of mental illness?</span>
+          <div class="demo-scale">
+            <input type="radio" name="family_history" id="fam0" value="0" required>
+            <label for="fam0">No</label>
+            <input type="radio" name="family_history" id="fam1" value="1">
+            <label for="fam1">Yes</label>
+            <input type="radio" name="family_history" id="fam2" value="0">
+            <label for="fam2">Not sure</label>
+          </div>
+        </div>
+        <div class="question">
+          <span class="q-label">Likelihood of seeking help if struggling?</span>
+          <div class="demo-scale">
+            <input type="radio" name="help_seeking" id="hs1" value="1" required>
+            <label for="hs1">Very likely</label>
+            <input type="radio" name="help_seeking" id="hs2" value="2">
+            <label for="hs2">Maybe</label>
+            <input type="radio" name="help_seeking" id="hs3" value="3">
+            <label for="hs3">Unlikely</label>
+          </div>
+        </div>
+      </div>
+
+      <hr class="card-divider">
+
+      <div class="q-grid">
+        <div class="question">
+          <span class="q-label">Days spent indoors recently</span>
+          <div class="demo-scale" style="flex-wrap:wrap;">
+            <input type="radio" name="days_indoors_q" id="di1" value="1" required>
+            <label for="di1">Go out daily</label>
+            <input type="radio" name="days_indoors_q" id="di2" value="2">
+            <label for="di2">1–14 days</label>
+            <input type="radio" name="days_indoors_q" id="di3" value="3">
+            <label for="di3">15–30 days</label>
+            <input type="radio" name="days_indoors_q" id="di4" value="4">
+            <label for="di4">31–60 days</label>
+            <input type="radio" name="days_indoors_q" id="di5" value="5">
+            <label for="di5">2+ months</label>
+          </div>
+        </div>
+        <div class="question">
+          <span class="q-label">General mood fluctuations</span>
+          <div class="demo-scale">
+            <input type="radio" name="mood_swings_q" id="ms1" value="1" required>
+            <label for="ms1">Low</label>
+            <input type="radio" name="mood_swings_q" id="ms2" value="2">
+            <label for="ms2">Medium</label>
+            <input type="radio" name="mood_swings_q" id="ms3" value="3">
+            <label for="ms3">High</label>
+          </div>
+        </div>
+      </div>
+
+      <hr class="card-divider">
+
+      <div class="question" style="margin-bottom:0">
+        <span class="q-label">Concern about stigma regarding mental health in your environment</span>
+        <span class="q-hint">1 = no concern at all · 5 = very significant concern</span>
+        <div class="scale">
+          {% for i, t in [(1,'None'),(2,'Slight'),(3,'Moderate'),(4,'Notable'),(5,'Severe')] %}
+          <input type="radio" name="stigma_concern" id="stg{{i}}" value="{{i}}" required>
+          <label for="stg{{i}}">
+            <span class="lbl-num">{{i}}</span>
+            <span class="lbl-txt">{{t}}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ SECTION 1: EMOTIONAL HEALTH ══ -->
+  <div class="section">
+    <div class="section-rule">
+      <div class="section-index">1</div>
+      <div>
+        <div class="section-label">Emotional Health</div>
+        <div class="section-desc">Mood and anxiety over the past 2–4 weeks</div>
+      </div>
+      <div class="section-line"></div>
+    </div>
+    <div class="card">
+      <div class="question">
+        <span class="q-label">How often have you felt sad, empty, or hopeless?</span>
+        <span class="q-hint">Reflects depressive symptom frequency</span>
+        <div class="scale">
+          {% for i, t in [(1,'Rarely'),(2,'Sometimes'),(3,'Often'),(4,'Very often'),(5,'Always')] %}
+          <input type="radio" name="depression" id="dep{{i}}" value="{{i}}" required>
+          <label for="dep{{i}}">
+            <span class="lbl-num">{{i}}</span><span class="lbl-txt">{{t}}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="question" style="margin-bottom:0">
+        <span class="q-label">How troubled have you been by nervousness, worry, or fear?</span>
+        <span class="q-hint">Reflects anxiety symptom intensity</span>
+        <div class="scale">
+          {% for i, t in [(1,'Not at all'),(2,'A little'),(3,'Moderately'),(4,'Quite a bit'),(5,'Extremely')] %}
+          <input type="radio" name="anxiety" id="anx{{i}}" value="{{i}}" required>
+          <label for="anx{{i}}">
+            <span class="lbl-num">{{i}}</span><span class="lbl-txt">{{t}}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 2: SOCIAL WELLBEING ══ -->
+  <div class="section">
+    <div class="section-rule">
+      <div class="section-index">2</div>
+      <div>
+        <div class="section-label">Social Wellbeing</div>
+        <div class="section-desc">Quality of connection and social engagement</div>
+      </div>
+      <div class="section-line"></div>
+    </div>
+    <div class="card">
+      <div class="question">
+        <span class="q-label">How isolated or cut off from others have you felt?</span>
+        <div class="scale">
+          {% for i, t in [(1,'Not at all'),(2,'A little'),(3,'Somewhat'),(4,'Quite a bit'),(5,'Very much')] %}
+          <input type="radio" name="isolation" id="iso{{i}}" value="{{i}}" required>
+          <label for="iso{{i}}">
+            <span class="lbl-num">{{i}}</span><span class="lbl-txt">{{t}}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="question">
+        <span class="q-label">How would you rate the quality of your social relationships overall?</span>
+        <span class="q-hint">Family, friends, colleagues — overall connectedness</span>
+        <div class="scale">
+          {% for i, t in [(1,'Very poor'),(2,'Poor'),(3,'Average'),(4,'Good'),(5,'Excellent')] %}
+          <input type="radio" name="social_relationships" id="soc{{i}}" value="{{i}}" required>
+          <label for="soc{{i}}">
+            <span class="lbl-num">{{i}}</span><span class="lbl-txt">{{t}}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="question" style="margin-bottom:0">
+        <span class="q-label">Have you experienced discrimination or unfair treatment in your environment?</span>
+        <div class="pills">
+          <input type="radio" name="campus_discrimination" id="dis0" value="0" required>
+          <label for="dis0">No</label>
+          <input type="radio" name="campus_discrimination" id="dis1" value="1">
+          <label for="dis1">Yes</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 3: STRESS ══ -->
+  <div class="section">
+    <div class="section-rule">
+      <div class="section-index">3</div>
+      <div>
+        <div class="section-label">Stress &amp; Functional Capacity</div>
+        <div class="section-desc">Academic / occupational pressure and financial concerns</div>
+      </div>
+      <div class="section-line"></div>
+    </div>
+    <div class="card">
+      <div class="question">
+        <span class="q-label">How much pressure do you feel from your work or academic workload?</span>
+        <div class="scale">
+          {% for i, t in [(1,'Very low'),(2,'Low'),(3,'Moderate'),(4,'High'),(5,'Very high')] %}
+          <input type="radio" name="academic_pressure" id="prs{{i}}" value="{{i}}" required>
+          <label for="prs{{i}}">
+            <span class="lbl-num">{{i}}</span><span class="lbl-txt">{{t}}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="question">
+        <span class="q-label">How worried are you about financial concerns?</span>
+        <div class="scale">
+          {% for i, t in [(1,'Not worried'),(2,'A little'),(3,'Somewhat'),(4,'Very worried'),(5,'Extremely')] %}
+          <input type="radio" name="financial_concerns" id="fin{{i}}" value="{{i}}" required>
+          <label for="fin{{i}}">
+            <span class="lbl-num">{{i}}</span><span class="lbl-txt">{{t}}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="question" style="margin-bottom:0">
+        <span class="q-label">How satisfied are you with your academic or professional progress?</span>
+        <div class="scale">
+          {% for i, t in [(1,'Very low'),(2,'Low'),(3,'Moderate'),(4,'High'),(5,'Very high')] %}
+          <input type="radio" name="study_satisfaction" id="sat{{i}}" value="{{i}}" required>
+          <label for="sat{{i}}">
+            <span class="lbl-num">{{i}}</span><span class="lbl-txt">{{t}}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 4: FUTURE & LIFESTYLE ══ -->
+  <div class="section">
+    <div class="section-rule">
+      <div class="section-index">4</div>
+      <div>
+        <div class="section-label">Future Outlook &amp; Lifestyle</div>
+        <div class="section-desc">Sense of future, sleep patterns, and physical activity</div>
+      </div>
+      <div class="section-line"></div>
+    </div>
+    <div class="card">
+      <div class="question">
+        <span class="q-label">How uncertain or insecure do you feel about your future?</span>
+        <div class="scale">
+          {% for i, t in [(1,'Very secure'),(2,'Secure'),(3,'Neutral'),(4,'Insecure'),(5,'Very insecure')] %}
+          <input type="radio" name="future_insecurity" id="fut{{i}}" value="{{i}}" required>
+          <label for="fut{{i}}">
+            <span class="lbl-num">{{i}}</span><span class="lbl-txt">{{t}}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      <hr class="card-divider">
+      <div class="q-grid">
+        <div class="question" style="margin-bottom:0">
+          <span class="q-label">Average hours of sleep per night</span>
+          <div class="pills">
+            <input type="radio" name="average_sleep" id="slp1" value="1" required>
+            <label for="slp1">2–4 hrs</label>
+            <input type="radio" name="average_sleep" id="slp2" value="2">
+            <label for="slp2">4–6 hrs</label>
+            <input type="radio" name="average_sleep" id="slp3" value="3">
+            <label for="slp3">7–8 hrs</label>
+          </div>
+        </div>
+        <div class="question" style="margin-bottom:0">
+          <span class="q-label">Physical activity sessions per week</span>
+          <div class="pills">
+            <input type="radio" name="sports_engagement" id="spt1" value="1" required>
+            <label for="spt1">None</label>
+            <input type="radio" name="sports_engagement" id="spt2" value="2">
+            <label for="spt2">1–3×</label>
+            <input type="radio" name="sports_engagement" id="spt3" value="3">
+            <label for="spt3">4–6×</label>
+            <input type="radio" name="sports_engagement" id="spt4" value="4">
+            <label for="spt4">Daily</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SUBMIT ══ -->
+  <div class="submit-wrap">
+    <button type="submit" class="submit-btn" id="submit-btn">
+      Generate Cognitive Behavioral Report
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+    </button>
+    <p class="disclaimer">
+      {{ clinic_name }} &nbsp;·&nbsp; For educational and demonstration purposes only<br>
+      This is not a clinical diagnostic instrument and does not replace professional medical advice.
+    </p>
+  </div>
+
+</form>
+</div>
+
+<script>
+  const form = document.getElementById('assessment-form');
+  const progressEl = document.getElementById('progress');
+  const TOTAL = 18; // all required radio groups + optional name
+
+  function updateProgress() {
+    const answered = new Set();
+    form.querySelectorAll('input[type=radio]:checked').forEach(r => answered.add(r.name));
+    const sel = form.querySelector('select[name=country]');
+    if (sel && sel.value) answered.add('country');
+    progressEl.style.width = (Math.min(answered.size, TOTAL) / TOTAL * 100) + '%';
+  }
+
+  form.addEventListener('change', updateProgress);
+  form.querySelector('select').addEventListener('change', updateProgress);
+
+  form.addEventListener('submit', function () {
+    const btn = document.getElementById('submit-btn');
+    btn.innerHTML = `
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite">
+        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+      </svg>
+      Generating report…`;
+    btn.disabled = true;
+  });
+</script>
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</body>
+</html>

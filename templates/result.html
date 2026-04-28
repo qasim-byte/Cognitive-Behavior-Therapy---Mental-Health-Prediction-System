@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ result.report_title }} — {{ result.patient_name }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:     #F4F1EC;
+    --paper:  #FDFCFA;
+    --ink:    #1C1C1A;
+    --muted:  #7A7670;
+    --faint:  #E8E4DC;
+    --rule:   #D4CFC5;
+    --teal:   #1A7A5A;
+    --blue:   #1E3A5F;
+    --serif:  'Cormorant Garamond', Georgia, serif;
+    --sans:   'DM Sans', system-ui, sans-serif;
+    --r:      10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: var(--sans);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 0 0 100px;
+  }
+
+  /* ══ REPORT HEADER ══ */
+  .report-header {
+    background: var(--blue);
+    position: relative;
+    overflow: hidden;
+  }
+  .report-header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      45deg, transparent, transparent 40px,
+      rgba(255,255,255,0.018) 40px, rgba(255,255,255,0.018) 41px);
+  }
+  .rh-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 32px 36px;
+    position: relative;
+  }
+  .rh-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 28px;
+  }
+  .clinic-label {
+    font-family: var(--serif);
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 5px;
+  }
+  .report-title {
+    font-family: var(--serif);
+    font-size: 36px;
+    font-weight: 700;
+    color: white;
+    line-height: 1.1;
+    letter-spacing: -0.3px;
+  }
+  .rh-meta {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .meta-chip {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    font-weight: 500;
+  }
+  .rh-right { text-align: right; flex-shrink: 0; }
+  .acc-badge {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.75);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .acc-dot { width: 7px; height: 7px; background: #5EEAB5; border-radius: 50%; }
+
+  /* ── Patient nameplate ── */
+  .nameplate {
+    border-top: 1px solid rgba(255,255,255,0.12);
+    padding-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .patient-block {}
+  .patient-lbl {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 3px;
+  }
+  .patient-name {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 600;
+    color: white;
+    letter-spacing: 0.01em;
+  }
+  .date-block { text-align: right; }
+  .date-lbl {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 3px;
+  }
+  .date-val {
+    font-family: var(--serif);
+    font-size: 16px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.8);
+  }
+
+  /* ══ CONTENT ══ */
+  .wrapper { max-width: 800px; margin: 0 auto; padding: 36px 24px 0; }
+
+  /* ══ OVERALL RESULT CARD ══ */
+  .result-card {
+    border-radius: 14px;
+    border: 2px solid;
+    padding: 32px 28px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    animation: fadeIn 0.5s ease;
+  }
+  .rc-badge {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-family: var(--serif);
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    border: 2.5px solid;
+  }
+  .rc-body { flex: 1; }
+  .rc-level {
+    font-family: var(--serif);
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .rc-score {
+    font-size: 15px;
+    color: var(--ink);
+    opacity: 0.75;
+    margin-bottom: 6px;
+  }
+  .rc-conf { font-size: 12px; color: var(--muted); }
+  .rc-right { text-align: right; flex-shrink: 0; }
+
+  /* ══ GAUGE ══ */
+  .gauge-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .gauge-lbl { font-size: 13px; font-weight: 600; color: var(--muted);
+               text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 16px; }
+  .gauge-track {
+    position: relative; height: 10px; border-radius: 5px;
+    background: linear-gradient(to right, #2A9E6E, #A8DFC8, #E8A020, #D05020, #9E1C1C);
+  }
+  .gauge-needle {
+    position: absolute; top: -8px; transform: translateX(-50%);
+    width: 3px; height: 26px; border-radius: 2px;
+    background: var(--ink);
+    transition: left 1.2s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+  .gauge-labels { display: flex; justify-content: space-between;
+                  font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .gauge-zones { display: flex; gap: 6px; margin-top: 14px; }
+  .gauge-zone {
+    flex: 1; text-align: center; padding: 8px 4px;
+    border-radius: 7px; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+
+  /* ══ DEMOGRAPHIC CONTEXT ══ */
+  .demo-panel {
+    background: #F5F8FF;
+    border: 1.5px solid #C2D3F0;
+    border-radius: var(--r);
+    padding: 22px 24px;
+    margin-bottom: 24px;
+  }
+  .dp-header {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dp-chips { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 16px; }
+  .dp-chip {
+    background: #E8EFFC;
+    color: var(--blue);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid #C2D3F0;
+  }
+  .dp-rows { display: flex; flex-direction: column; gap: 10px; }
+  .dp-row {
+    background: white;
+    border: 1px solid #DAE5F7;
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .dp-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .dp-text {}
+  .dp-text strong { color: var(--blue); font-size: 12px; font-weight: 700; display: block; margin-bottom: 2px; }
+  .dp-text span { font-size: 13px; color: #444; line-height: 1.55; }
+
+  /* ══ SECTION TITLE ══ */
+  .sec-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sec-title::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
+
+  /* ══ DOMAIN GRID ══ */
+  .domain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+  .domain-card {
+    background: var(--paper);
+    border: 1.5px solid var(--rule);
+    border-radius: var(--r);
+    padding: 22px 20px;
+    animation: slideUp 0.4s ease both;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .domain-card:nth-child(2) { animation-delay: 0.07s; }
+  .domain-card:nth-child(3) { animation-delay: 0.14s; }
+  .domain-card:nth-child(4) { animation-delay: 0.21s; }
+  .dc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .dc-name { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .dc-badge {
+    font-size: 10px; font-weight: 700; padding: 3px 9px;
+    border-radius: 12px; letter-spacing: 0.04em;
+  }
+  .dc-score {
+    font-family: var(--serif);
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+  .dc-score span { font-size: 18px; color: var(--muted); font-weight: 400; }
+  .dc-bar-track { background: var(--faint); border-radius: 3px; height: 5px; margin-bottom: 12px; }
+  .dc-bar-fill { height: 5px; border-radius: 3px; transition: width 1.1s ease; }
+  .dc-rec { font-size: 12px; color: var(--muted); line-height: 1.65; }
+
+  /* ══ PROBABILITY BARS ══ */
+  .prob-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    padding: 22px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .prob-title { font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+                text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .prob-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .prob-row:last-child { margin-bottom: 0; }
+  .prob-label { width: 75px; font-size: 13px; font-weight: 600; }
+  .prob-track { flex: 1; background: var(--faint); border-radius: 3px; height: 8px; }
+  .prob-fill  { height: 8px; border-radius: 3px; transition: width 1.1s ease; }
+  .prob-pct   { width: 40px; font-size: 13px; font-weight: 700; text-align: right; }
+
+  /* ══ RECOMMENDATIONS ══ */
+  .rec-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    padding: 24px;
+    margin-bottom: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .rec-header { font-family: var(--serif); font-size: 20px; font-weight: 600;
+                color: var(--ink); margin-bottom: 18px; }
+  .rec-items { display: flex; flex-direction: column; gap: 10px; }
+  .rec-item { display: flex; gap: 12px; align-items: flex-start; }
+  .rec-dot  { width: 7px; height: 7px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+  .rec-text { font-size: 14px; line-height: 1.7; color: #444; }
+
+  /* ══ FOOTER ══ */
+  .report-footer {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .footer-clinic {
+    font-family: var(--serif);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--blue);
+  }
+  .footer-disc { font-size: 11px; color: var(--muted); line-height: 1.55; max-width: 460px; }
+  .footer-actions { display: flex; gap: 10px; flex-shrink: 0; }
+  .btn-dark {
+    padding: 10px 20px;
+    background: var(--ink);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-outline {
+    padding: 10px 20px;
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--rule);
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  @keyframes fadeIn  { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes slideUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+  @media (max-width: 580px) {
+    .domain-grid { grid-template-columns: 1fr; }
+    .rc-level { font-size: 32px; }
+    .rh-top { flex-direction: column; }
+    .nameplate { flex-direction: column; gap: 12px; }
+    .report-footer { flex-direction: column; }
+    .footer-actions { width: 100%; }
+    .btn-dark, .btn-outline { flex: 1; text-align: center; }
+    .result-card { flex-direction: column; gap: 16px; }
+  }
+
+  @media print {
+    body { background: white; }
+    .footer-actions { display: none; }
+    .btn-dark, .btn-outline { display: none; }
+  }
+</style>
+</head>
+<body>
+
+{% set c = result.overall_color %}
+{% set bg = result.overall_bg %}
+{% set r  = result.overall_risk %}
+
+<!-- ══ REPORT HEADER ══ -->
+<div class="report-header">
+  <div class="rh-inner">
+    <div class="rh-top">
+      <div>
+        <div class="clinic-label">{{ result.clinic_name }}</div>
+        <div class="report-title">{{ result.report_title }}</div>
+        <div class="rh-meta">
+          <span class="meta-chip">Mental Health Self-Assessment</span>
+          <span class="meta-chip">{{ result.demo.gender }}</span>
+          <span class="meta-chip">{{ result.demo.age_group }}</span>
+          <span class="meta-chip">{{ result.demo.country }}</span>
+        </div>
+      </div>
+      <div class="rh-right">
+        <div class="acc-badge">
+          <span class="acc-dot"></span>
+          Model accuracy: <strong>{{ result.model_accuracy }}%</strong>
+        </div>
+      </div>
+    </div>
+    <div class="nameplate">
+      <div class="patient-block">
+        <div class="patient-lbl">Patient / Respondent</div>
+        <div class="patient-name">{{ result.patient_name }}</div>
+      </div>
+      <div class="date-block">
+        <div class="date-lbl">Assessment Date</div>
+        <div class="date-val">{{ result.report_date }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrapper">
+
+  <!-- ══ OVERALL RESULT ══ -->
+  <div class="result-card" style="background:{{ bg }}; border-color:{{ c }}66; color:{{ c }};">
+    <div class="rc-badge" style="background:{{ bg }}; border-color:{{ c }}; color:{{ c }};">
+      Risk<br>Level
+    </div>
+    <div class="rc-body">
+      <div class="rc-level">{{ result.overall_label }}</div>
+      <div class="rc-score" style="color:var(--ink)">
+        Overall score: <strong>{{ result.overall_score }}</strong> / 10
+      </div>
+      <div class="rc-conf">
+        Prediction confidence: {{ result.confidence }}%
+        &nbsp;·&nbsp; Trained on 293K+ real survey responses
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ GAUGE ══ -->
+  <div class="gauge-card">
+    <div class="gauge-lbl">Mental Health Risk Gauge</div>
+    <div class="gauge-track">
+      <div class="gauge-needle" id="needle"></div>
+    </div>
+    <div class="gauge-labels">
+      <span>0 — Healthy</span>
+      <span>5 — Moderate</span>
+      <span>10 — Severe</span>
+    </div>
+    <div class="gauge-zones">
+      <div class="gauge-zone" style="background:#E8F8F0; color:#0E5C40; {{ 'outline:2px solid #2A9E6E;' if r==0 else '' }}">Normal</div>
+      <div class="gauge-zone" style="background:#FEF3E2; color:#7A4A05; {{ 'outline:2px solid #E8A020;' if r==1 else '' }}">Mild</div>
+      <div class="gauge-zone" style="background:#FCEAE4; color:#6E2810; {{ 'outline:2px solid #D05020;' if r==2 else '' }}">Moderate</div>
+      <div class="gauge-zone" style="background:#FAE8E8; color:#6B1212; {{ 'outline:2px solid #9E1C1C;' if r==3 else '' }}">Severe</div>
+    </div>
+  </div>
+
+  <!-- ══ DEMOGRAPHIC CONTEXT ══ -->
+  <div class="demo-panel">
+    <div class="dp-header">
+      &#9632;&nbsp; Demographic &amp; Contextual Factors
+    </div>
+    <div class="dp-chips">
+      <span class="dp-chip">{{ result.demo.gender }}</span>
+      <span class="dp-chip">Age {{ result.demo.age_group }}</span>
+      <span class="dp-chip">{{ result.demo.country }}</span>
+    </div>
+    <div class="dp-rows">
+      {% if result.demo.age_insight %}
+      <div class="dp-row">
+        <div class="dp-icon">🔍</div>
+        <div class="dp-text">
+          <strong>Age Group Insight</strong>
+          <span>{{ result.demo.age_insight }}</span>
+        </div>
+      </div>
+      {% endif %}
+      {% if result.demo.gender_note %}
+      <div class="dp-row">
+        <div class="dp-icon">👤</div>
+        <div class="dp-text">
+          <strong>Gender Pattern</strong>
+          <span>{{ result.demo.gender_note }}</span>
+        </div>
+      </div>
+      {% endif %}
+      {% if result.demo.family_note %}
+      <div class="dp-row">
+        <div class="dp-icon">🧬</div>
+        <div class="dp-text">
+          <strong>Family History Note</strong>
+          <span>{{ result.demo.family_note }}</span>
+        </div>
+      </div>
+      {% endif %}
+      <div class="dp-row">
+        <div class="dp-icon">🌍</div>
+        <div class="dp-text">
+          <strong>Support Resources — {{ result.demo.country }}</strong>
+          <span>{{ result.demo.country_note }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DOMAIN BREAKDOWN ══ -->
+  <div class="sec-title">Four-Domain Breakdown</div>
+  <div class="domain-grid">
+    {% for key, d in result.domains.items() %}
+    <div class="domain-card">
+      <div class="dc-header">
+        <div class="dc-name">{{ d.label }}</div>
+        <div class="dc-badge" style="background:{{ d.bg }}; color:{{ d.color }};">{{ d.risk_label }}</div>
+      </div>
+      <div class="dc-score" style="color:{{ d.color }}">
+        {{ d.score }}<span> / 10</span>
+      </div>
+      <div class="dc-bar-track">
+        <div class="dc-bar-fill dc-bar-{{ key }}" style="background:{{ d.color }}; width:0%;"></div>
+      </div>
+      <div class="dc-rec">{{ d.recommendation }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- ══ PROBABILITY DISTRIBUTION ══ -->
+  <div class="prob-card">
+    <div class="prob-title">Model Confidence by Risk Level</div>
+    {% set pcols = {'Normal':'#2A9E6E','Mild':'#E8A020','Moderate':'#D05020','Severe':'#9E1C1C'} %}
+    {% for label, pct in result.proba.items() %}
+    <div class="prob-row">
+      <div class="prob-label" style="color:{{ pcols[label] }}">{{ label }}</div>
+      <div class="prob-track">
+        <div class="prob-fill prob-fill-{{ loop.index }}" style="background:{{ pcols[label] }}; width:0%;"></div>
+      </div>
+      <div class="prob-pct" style="color:{{ pcols[label] }}">{{ pct }}%</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- ══ RECOMMENDATIONS ══ -->
+  <div class="rec-card">
+    <div class="rec-header">Personalised Recommendations</div>
+    <div class="rec-items">
+      {% for rec in result.recommendations %}
+      <div class="rec-item">
+        <div class="rec-dot" style="background:{{ result.overall_color }};"></div>
+        <div class="rec-text">{{ rec }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ══ FOOTER ══ -->
+  <div class="report-footer">
+    <div>
+      <div class="footer-clinic">{{ result.clinic_name }}</div>
+      <div class="footer-disc">
+        This report is generated for educational and demonstration purposes only.
+        It is not a clinical diagnostic instrument and does not constitute medical advice.
+        Please consult a qualified mental health professional for any clinical concerns.
+      </div>
+    </div>
+    <div class="footer-actions">
+      <a href="/" class="btn-outline">← New Assessment</a>
+      <button onclick="window.print()" class="btn-dark">Print / Save</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const score  = {{ result.overall_score }};
+  window.addEventListener('load', () => {
+
+    // Gauge needle
+    setTimeout(() => {
+      document.getElementById('needle').style.left = (score * 10) + '%';
+    }, 250);
+
+    // Domain bars
+    {% for key, d in result.domains.items() %}
+    setTimeout(() => {
+      const el = document.querySelector('.dc-bar-{{ key }}');
+      if (el) el.style.width = ({{ d.score }} * 10) + '%';
+    }, 350);
+    {% endfor %}
+
+    // Prob bars
+    {% for label, pct in result.proba.items() %}
+    setTimeout(() => {
+      const el = document.querySelector('.prob-fill-{{ loop.index }}');
+      if (el) el.style.width = '{{ pct }}%';
+    }, 450);
+    {% endfor %}
+  });
+</script>
+</body>
+</html>
