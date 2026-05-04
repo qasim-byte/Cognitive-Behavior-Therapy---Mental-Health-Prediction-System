@@ -22,7 +22,7 @@ def load_and_merge():
     """Load both datasets, harmonise features, return combined DataFrame."""
 
     # ── OSMI Survey (DS1) ────────────────────────────────────────────────────
-    df1 = pd.read_csv(./survey.csv)
+    df1 = pd.read_csv("./survey.csv")
 
     def clean_gender(g):
         g = str(g).strip().lower()
@@ -82,7 +82,7 @@ def load_and_merge():
         bins=[0,3.5,5.5,7.5,100], labels=[0,1,2,3]).astype(int)
 
     # ── Mental Health Dataset (DS2) ──────────────────────────────────────────
-    df2 = pd.read_csv(./Mental_Health_Dataset.csv)
+    df2 = pd.read_csv("./Mental_Health_Dataset.csv")
 
     yn = {'Yes':1,'No':0,'Maybe':0.5}
     df2['growing_stress']   = df2['Growing_Stress'].map(yn).fillna(0.5)
